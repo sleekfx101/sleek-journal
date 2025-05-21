@@ -1,52 +1,45 @@
-import { useEffect } from "react";
-import "./App.css";
-import { BrowserRouter, Routes, Route } from "react-router-dom";
-import axios from "axios";
+import React, { useState } from 'react';
+import { Routes, Route, useLocation } from 'react-router-dom';
+import { AnimatePresence } from 'framer-motion';
 
-const BACKEND_URL = process.env.REACT_APP_BACKEND_URL;
-const API = `${BACKEND_URL}/api`;
+// Layouts
+import Dashboard from './pages/dashboard/Dashboard';
+import Journal from './pages/journal/Journal';
+import Analytics from './pages/analytics/Analytics';
+import Backtesting from './pages/backtesting/Backtesting';
+import Settings from './pages/settings/Settings';
+import LandingPage from './pages/LandingPage';
 
-const Home = () => {
-  const helloWorldApi = async () => {
-    try {
-      const response = await axios.get(`${API}/`);
-      console.log(response.data.message);
-    } catch (e) {
-      console.error(e, `errored out requesting / api`);
-    }
-  };
-
-  useEffect(() => {
-    helloWorldApi();
-  }, []);
-
-  return (
-    <div>
-      <header className="App-header">
-        <a
-          className="App-link"
-          href="https://emergent.sh"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <img src="https://avatars.githubusercontent.com/in/1201222?s=120&u=2686cf91179bbafbc7a71bfbc43004cf9ae1acea&v=4" />
-        </a>
-        <p className="mt-5">Building something incredible ~!</p>
-      </header>
-    </div>
-  );
-};
+// Components
+import Header from './components/layout/Header';
+import Sidebar from './components/layout/Sidebar';
 
 function App() {
+  const [sidebarOpen, setSidebarOpen] = useState(true);
+  const location = useLocation();
+  const isLandingPage = location.pathname === '/';
+
   return (
     <div className="App">
-      <BrowserRouter>
-        <Routes>
-          <Route path="/" element={<Home />}>
-            <Route index element={<Home />} />
-          </Route>
-        </Routes>
-      </BrowserRouter>
+      {!isLandingPage && (
+        <>
+          <Header sidebarOpen={sidebarOpen} setSidebarOpen={setSidebarOpen} />
+          <Sidebar sidebarOpen={sidebarOpen} />
+        </>
+      )}
+      
+      <main className={`${!isLandingPage ? 'ml-0 lg:ml-64 pt-16' : ''} transition-all duration-300 min-h-screen`}>
+        <AnimatePresence mode="wait">
+          <Routes location={location} key={location.pathname}>
+            <Route path="/" element={<LandingPage />} />
+            <Route path="/dashboard" element={<Dashboard />} />
+            <Route path="/journal" element={<Journal />} />
+            <Route path="/analytics" element={<Analytics />} />
+            <Route path="/backtesting" element={<Backtesting />} />
+            <Route path="/settings" element={<Settings />} />
+          </Routes>
+        </AnimatePresence>
+      </main>
     </div>
   );
 }
